@@ -1,0 +1,36 @@
+---
+import Constellation from '../components/Constellation.tsx';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#080C18" />
+    <meta name="description" content="Phronos — a personal knowledge-graph system." />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <title>Phronos</title>
+    <style is:global>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #080c18;
+        overscroll-behavior: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- D3 drives the DOM and uses browser-only APIs, so render client-only. -->
+    <Constellation client:only="react" />
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>

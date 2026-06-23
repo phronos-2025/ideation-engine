@@ -1,0 +1,22 @@
+node_modules/
+dist/
+build/
+.astro/
+.vercel/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# pnpm
+.pnpm-store/

@@ -1,0 +1,17 @@
+{
+  "name": "Phronos",
+  "short_name": "Phronos",
+  "description": "A personal knowledge-graph system.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080C18",
+  "theme_color": "#080C18",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
