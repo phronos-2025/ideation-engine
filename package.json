@@ -16,7 +16,7 @@
     "format": "prettier --write .",
     "db:generate": "pnpm --filter @phronos/db generate",
     "db:migrate": "pnpm --filter @phronos/db migrate",
-    "db:seed": "pnpm --filter @phronos/db seed"
+    "db:seed": "pnpm --filter @phronos/core seed"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["esbuild", "sharp"]
