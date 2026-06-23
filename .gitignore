@@ -12,6 +12,11 @@ coverage/
 .env.*
 !.env.example
 
+# Large/redundant design-source artifacts (kept on disk, not tracked).
+# The canonical design system lives in "starter-material/Website page layouts/".
+starter-material/*.zip
+starter-material/Phronos Mobile (standalone).html
+
 # OS / editor
 .DS_Store
 .idea/

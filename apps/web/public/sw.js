@@ -1,6 +1,7 @@
-// Minimal service worker for installability + an offline app shell.
-// API calls (/api/*) always go to the network; the static shell is cache-first.
-const CACHE = 'phronos-shell-v1';
+// Minimal service worker for installability + an offline fallback.
+// Navigations are network-first (so a fresh deploy/reload is never masked by a
+// stale cached shell); static assets are cache-first; /api/* is network-only.
+const CACHE = 'phronos-shell-v2';
 const SHELL = ['/', '/manifest.webmanifest', '/icon.svg'];
 
 self.addEventListener('install', (event) => {
@@ -10,17 +11,23 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))),
+    caches
+      .keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))),
   );
   self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-  if (url.pathname.startsWith('/api/') || event.request.method !== 'GET') {
-    return; // network-only for the API and all mutations
+  const req = event.request;
+  const url = new URL(req.url);
+  if (url.pathname.startsWith('/api/') || req.method !== 'GET') return; // network-only
+
+  // Network-first for page navigations; fall back to the cached shell offline.
+  if (req.mode === 'navigate') {
+    event.respondWith(fetch(req).catch(() => caches.match('/')));
+    return;
   }
-  event.respondWith(
-    caches.match(event.request).then((hit) => hit || fetch(event.request)),
-  );
+  // Cache-first for other static GETs.
+  event.respondWith(caches.match(req).then((hit) => hit || fetch(req)));
 });

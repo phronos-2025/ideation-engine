@@ -1,0 +1,20 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "api",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "DATABASE_URL=postgres://postgres:postgres@localhost:5432/phronos API_SERVICE_TOKEN=dev-token PORT=8080 pnpm --filter @phronos/api start"
+      ],
+      "port": 8080
+    },
+    {
+      "name": "web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@phronos/web", "dev"],
+      "port": 4321
+    }
+  ]
+}

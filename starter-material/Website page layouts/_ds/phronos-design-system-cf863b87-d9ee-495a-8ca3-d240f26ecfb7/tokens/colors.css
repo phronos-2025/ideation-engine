@@ -1,0 +1,91 @@
+/* ============================================================
+   Phronos — Color tokens
+   "An observatory for ideas." Ink & parchment base for reading,
+   a deep night-sky canvas for the constellation graph, and a
+   phase-driven semantic spine: divergent → convergent → operational.
+   ============================================================ */
+
+:root {
+  /* ---- Neutral ramp — warm parchment → deep ink -------------- */
+  --paper-0:  #FBF9F4;   /* page base, lightest parchment        */
+  --paper-1:  #F5F1E8;   /* sunken surfaces, rails               */
+  --paper-2:  #ECE6D8;   /* hairline fills, hover on paper        */
+  --paper-3:  #DED6C4;   /* borders on parchment                  */
+
+  --ink-0:    #16181D;   /* near-black ink, primary text          */
+  --ink-1:    #2A2D36;   /* strong text on light                  */
+  --ink-2:    #4A4E5A;   /* secondary text                        */
+  --ink-3:    #6E7280;   /* tertiary / captions                   */
+  --ink-4:    #9A9DA8;   /* disabled, faint                       */
+
+  /* ---- Night sky — the constellation canvas ----------------- */
+  --night-0:  #0E1016;   /* deepest canvas                        */
+  --night-1:  #14171F;   /* canvas base                           */
+  --night-2:  #1C2029;   /* raised panel on night                 */
+  --night-3:  #272C38;   /* border / divider on night             */
+  --night-4:  #3A4151;   /* strong border on night                */
+  --starlight:#E8EAF2;   /* primary text on night                 */
+  --starlight-2:#A6ABBC; /* secondary text on night               */
+
+  /* ---- Brand / signature — midnight indigo ------------------ */
+  --indigo-0: #EEEFFB;
+  --indigo-1: #C9CCF2;
+  --indigo-2: #8C92E0;
+  --indigo-3: #5B62C9;   /* signature indigo                      */
+  --indigo-4: #3E45A8;   /* hover / pressed                       */
+  --indigo-5: #2C3184;   /* deep                                  */
+
+  /* ---- Phase spine ------------------------------------------ */
+  /* Divergent — scattered potential, sky / periwinkle           */
+  --divergent-0: #E8ECFA;
+  --divergent-1: #B9C4F0;
+  --divergent-2: #6E81DC;   /* core                              */
+  --divergent-3: #4257B8;
+  /* Convergent — focusing light, amber / gold                   */
+  --convergent-0: #F8EEDA;
+  --convergent-1: #ECCF94;
+  --convergent-2: #CF9A3E;   /* core                             */
+  --convergent-3: #A6741F;
+  /* Operational — grown, actionable, green                      */
+  --operational-0: #DEEDE3;
+  --operational-1: #A6D2B6;
+  --operational-2: #3E8E6B;   /* core                            */
+  --operational-3: #2A6B4F;
+
+  /* ---- Status ----------------------------------------------- */
+  --positive:  #3E8E6B;
+  --caution:   #CF9A3E;
+  --critical:  #C0473B;
+  --critical-soft: #F6E2DF;
+  --info:      #5B62C9;
+
+  /* =========================================================
+     Semantic aliases — reference these in components
+     ========================================================= */
+  --bg-page:        var(--paper-0);
+  --bg-sunken:      var(--paper-1);
+  --surface-card:   #FFFFFF;
+  --surface-raised: #FFFFFF;
+  --surface-hover:  var(--paper-2);
+  --surface-night:  var(--night-1);
+  --surface-night-raised: var(--night-2);
+
+  --text-strong:    var(--ink-0);
+  --text-body:      var(--ink-1);
+  --text-muted:     var(--ink-2);
+  --text-faint:     var(--ink-3);
+  --text-disabled:  var(--ink-4);
+  --text-on-night:  var(--starlight);
+  --text-on-night-muted: var(--starlight-2);
+  --text-on-accent: #FFFFFF;
+
+  --border-hairline: var(--paper-3);
+  --border-strong:   #C7BDA8;
+  --border-night:    var(--night-3);
+
+  --accent:         var(--indigo-3);
+  --accent-hover:   var(--indigo-4);
+  --accent-press:   var(--indigo-5);
+  --accent-tint:    var(--indigo-0);
+  --focus-ring:     color-mix(in oklab, var(--indigo-3) 55%, transparent);
+}

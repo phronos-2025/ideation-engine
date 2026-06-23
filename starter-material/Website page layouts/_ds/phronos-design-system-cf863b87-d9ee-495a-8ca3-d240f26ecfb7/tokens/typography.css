@@ -1,0 +1,42 @@
+/* ============================================================
+   Phronos — Typography tokens
+   Spectral (serif display) · Hanken Grotesk (UI sans) ·
+   IBM Plex Mono (IDs / provenance / metadata).
+   ============================================================ */
+
+:root {
+  /* ---- Families -------------------------------------------- */
+  --font-serif: 'Spectral', Georgia, 'Times New Roman', serif;
+  --font-sans:  'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono:  'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* ---- Type scale (mobile-first, fluid where it earns it) --- */
+  --text-display:  2.625rem;  /* 42px — hero / cover               */
+  --text-h1:       2rem;      /* 32px                              */
+  --text-h2:       1.5rem;    /* 24px                              */
+  --text-h3:       1.25rem;   /* 20px                              */
+  --text-title:    1.0625rem; /* 17px — card / row title           */
+  --text-body-lg:  1rem;      /* 16px                              */
+  --text-body:     0.9375rem; /* 15px — default UI body            */
+  --text-sm:       0.8125rem; /* 13px — secondary                  */
+  --text-xs:       0.6875rem; /* 11px — labels / mono caps         */
+
+  /* ---- Weights --------------------------------------------- */
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semibold:600;
+  --weight-bold:    700;
+  --weight-black:   800;
+
+  /* ---- Line heights ---------------------------------------- */
+  --leading-tight:  1.1;
+  --leading-snug:   1.28;
+  --leading-normal: 1.5;
+  --leading-relaxed:1.65;   /* reading copy, notes               */
+
+  /* ---- Tracking -------------------------------------------- */
+  --tracking-tight:  -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide:   0.02em;
+  --tracking-label:  0.12em;  /* mono eyebrow / overline           */
+}

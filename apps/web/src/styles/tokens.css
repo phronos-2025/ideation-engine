@@ -1,0 +1,215 @@
+/*
+ * Phronos design tokens — vendored from the authoritative Claude Design export
+ * at starter-material/"Website page layouts"/_ds/phronos-design-system-cf863b87…/.
+ * Values match colors.css / typography.css / spacing.css / base.css verbatim.
+ *
+ * ONE deliberate deviation: the export defines `--text-body` twice — a color in
+ * colors.css and a 0.9375rem size in typography.css (a collision; the size wins
+ * by import order, breaking `color: var(--text-body)`). Here `--text-body` is
+ * the COLOR and the body size is `--text-body-sz`.
+ */
+:root {
+  /* ---- Neutral ramp — warm parchment → deep ink ---- */
+  --paper-0: #fbf9f4;
+  --paper-1: #f5f1e8;
+  --paper-2: #ece6d8;
+  --paper-3: #ded6c4;
+  --ink-0: #16181d;
+  --ink-1: #2a2d36;
+  --ink-2: #4a4e5a;
+  --ink-3: #6e7280;
+  --ink-4: #9a9da8;
+
+  /* ---- Night sky — the constellation canvas ---- */
+  --night-0: #0e1016;
+  --night-1: #14171f;
+  --night-2: #1c2029;
+  --night-3: #272c38;
+  --night-4: #3a4151;
+  --starlight: #e8eaf2;
+  --starlight-2: #a6abbc;
+
+  /* ---- Brand — midnight indigo ---- */
+  --indigo-0: #eeeffb;
+  --indigo-1: #c9ccf2;
+  --indigo-2: #8c92e0;
+  --indigo-3: #5b62c9;
+  --indigo-4: #3e45a8;
+  --indigo-5: #2c3184;
+
+  /* ---- Phase spine ---- */
+  --divergent-0: #e8ecfa;
+  --divergent-1: #b9c4f0;
+  --divergent-2: #6e81dc;
+  --divergent-3: #4257b8;
+  --convergent-0: #f8eeda;
+  --convergent-1: #eccf94;
+  --convergent-2: #cf9a3e;
+  --convergent-3: #a6741f;
+  --operational-0: #deede3;
+  --operational-1: #a6d2b6;
+  --operational-2: #3e8e6b;
+  --operational-3: #2a6b4f;
+
+  /* ---- Status ---- */
+  --positive: #3e8e6b;
+  --caution: #cf9a3e;
+  --critical: #c0473b;
+  --critical-soft: #f6e2df;
+  --info: #5b62c9;
+
+  /* ---- Semantic aliases ---- */
+  --bg-page: var(--paper-0);
+  --bg-sunken: var(--paper-1);
+  --surface-card: #ffffff;
+  --surface-raised: #ffffff;
+  --bg-raised: #ffffff; /* alias kept for components */
+  --surface-hover: var(--paper-2);
+  --surface-night: var(--night-1);
+  --surface-night-raised: var(--night-2);
+
+  --text-strong: var(--ink-0);
+  --text-body: var(--ink-1); /* COLOR (see header note) */
+  --text-muted: var(--ink-2);
+  --text-faint: var(--ink-3);
+  --text-disabled: var(--ink-4);
+  --text-on-night: var(--starlight);
+  --text-on-night-muted: var(--starlight-2);
+  --text-on-accent: #ffffff;
+
+  --border-hairline: var(--paper-3);
+  --border-strong: #c7bda8;
+  --border-night: var(--night-3);
+
+  --accent: var(--indigo-3);
+  --accent-hover: var(--indigo-4);
+  --accent-press: var(--indigo-5);
+  --accent-tint: var(--indigo-0);
+  --focus-ring: color-mix(in oklab, var(--indigo-3) 55%, transparent);
+
+  /* ---- Type ---- */
+  --font-serif: 'Spectral', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --text-display: 2.625rem;
+  --text-h1: 2rem;
+  --text-h2: 1.5rem;
+  --text-h3: 1.25rem;
+  --text-title: 1.0625rem;
+  --text-body-lg: 1rem;
+  --text-body-sz: 0.9375rem; /* body size (see header note) */
+  --text-sm: 0.8125rem;
+  --text-xs: 0.6875rem;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-black: 800;
+  --leading-tight: 1.1;
+  --leading-snug: 1.28;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.02em;
+  --tracking-label: 0.12em;
+
+  /* ---- Spacing (8px base, 4px half-step) ---- */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* ---- Radii ---- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+  --border-width: 1px;
+  --border-width-strong: 1.5px;
+
+  /* ---- Shadows ---- */
+  --shadow-xs: 0 1px 2px rgba(22, 24, 29, 0.06);
+  --shadow-sm: 0 1px 2px rgba(22, 24, 29, 0.05), 0 2px 6px rgba(22, 24, 29, 0.05);
+  --shadow-md: 0 2px 4px rgba(22, 24, 29, 0.05), 0 8px 20px rgba(22, 24, 29, 0.08);
+  --shadow-lg: 0 6px 14px rgba(22, 24, 29, 0.07), 0 22px 48px rgba(22, 24, 29, 0.12);
+  --glow-divergent: 0 0 0 1px rgba(110, 129, 220, 0.5), 0 0 18px rgba(110, 129, 220, 0.45);
+  --glow-convergent: 0 0 0 1px rgba(207, 154, 62, 0.5), 0 0 18px rgba(207, 154, 62, 0.45);
+  --glow-operational: 0 0 0 1px rgba(62, 142, 107, 0.5), 0 0 18px rgba(62, 142, 107, 0.45);
+
+  /* ---- Motion ---- */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 340ms;
+
+  /* ---- Layout ---- */
+  --container-max: 1240px;
+  --rail-width: 288px;
+  --tabbar-height: 60px;
+  --topbar-height: 56px;
+  --touch-target: 44px;
+}
+
+/* ---- Base element defaults (from the export's base.css) ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-body-sz);
+  line-height: var(--leading-normal);
+  color: var(--text-body);
+  background: var(--bg-page);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior: none;
+}
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-serif);
+  color: var(--text-strong);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+}
+p {
+  margin: 0;
+}
+.mono {
+  font-family: var(--font-mono);
+}
+::selection {
+  background: var(--indigo-1);
+  color: var(--ink-0);
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.ph-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
