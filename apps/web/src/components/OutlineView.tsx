@@ -125,7 +125,9 @@ export function OutlineView({ model, selectedId, onSelect, onAddNode, onCreateSu
               {node.label}
             </div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', color: 'var(--text-faint)' }}>
-              {hasKids ? `${model.descendantCount(node.id)} nodes` : node.tier.replace('_', ' ')}
+              {hasKids
+                ? `${model.descendantCount(node.id)} nodes`
+                : `${node.tier.replace('_', ' ')}${node.ctx ? ' · ' + node.ctx : ''}`}
             </div>
           </div>
           {hasKids && <CountBadge>{children.length}</CountBadge>}

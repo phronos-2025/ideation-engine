@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import type { GraphEdge, GraphNode, Phase } from '../lib/api';
-import { GraphModel, PHASE_LABEL } from '../lib/graph';
+import { GraphModel, PHASE_LABEL, ctxColor, distinctCtx } from '../lib/graph';
 
 const PHASE_HEX: Record<Phase, string> = {
   divergent: '#6e81dc',
@@ -41,6 +41,8 @@ export function GraphView({ model, selectedId, onSelect }: Props) {
   const [dims, setDims] = useState({ w: 800, h: 600 });
   const [, setTick] = useState(0);
   const [phaseFilter, setPhaseFilter] = useState<Phase | null>(null);
+  const [ctxFilter, setCtxFilter] = useState<string | null>(null);
+  const ctxValues = distinctCtx(model.nodes);
 
   // Build/refresh the simulation whenever the model identity changes.
   useEffect(() => {
@@ -114,36 +116,77 @@ export function GraphView({ model, selectedId, onSelect }: Props) {
 
   const nodes = nodesRef.current;
   const links = linksRef.current;
-  const visible = phaseFilter ? nodes.filter((n) => n.phase === phaseFilter || n.tier === 'life_track') : nodes;
+  const visible = nodes.filter((n) => {
+    if (n.tier === 'life_track') return true; // anchors always shown for orientation
+    if (phaseFilter && n.phase !== phaseFilter) return false;
+    if (ctxFilter && n.ctx !== ctxFilter) return false;
+    return true;
+  });
   const visibleIds = new Set(visible.map((n) => n.id));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, background: 'var(--night-0)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 'var(--space-3) var(--space-4)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 'var(--space-3) var(--space-4)' }}>
         <h1 style={{ fontSize: 'var(--text-h3)', color: 'var(--starlight)' }}>Constellation</h1>
-        <div style={{ flex: 1 }} />
-        <div style={{ display: 'flex', gap: 4, background: 'var(--night-2)', borderRadius: 'var(--radius-pill)', padding: 3 }}>
-          {([null, 'divergent', 'convergent', 'operational'] as const).map((p) => {
-            const active = phaseFilter === p;
-            return (
-              <button
-                key={p ?? 'all'}
-                onClick={() => setPhaseFilter(p)}
-                style={{
-                  border: 'none',
-                  cursor: 'pointer',
-                  borderRadius: 'var(--radius-pill)',
-                  padding: '4px 12px',
-                  fontSize: 'var(--text-xs)',
-                  fontWeight: 'var(--weight-medium)',
-                  background: active ? 'var(--night-4)' : 'transparent',
-                  color: active ? 'var(--starlight)' : 'var(--starlight-2)',
-                }}
-              >
-                {p ? PHASE_LABEL[p] : 'All'}
-              </button>
-            );
-          })}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          {/* Phase filter (segmented) */}
+          <div style={{ display: 'flex', gap: 4, background: 'var(--night-2)', borderRadius: 'var(--radius-pill)', padding: 3 }}>
+            {([null, 'divergent', 'convergent', 'operational'] as const).map((p) => {
+              const active = phaseFilter === p;
+              return (
+                <button
+                  key={p ?? 'all'}
+                  onClick={() => setPhaseFilter(p)}
+                  style={{
+                    border: 'none',
+                    cursor: 'pointer',
+                    borderRadius: 'var(--radius-pill)',
+                    padding: '4px 12px',
+                    fontSize: 'var(--text-xs)',
+                    fontWeight: 'var(--weight-medium)',
+                    background: active ? 'var(--night-4)' : 'transparent',
+                    color: active ? 'var(--starlight)' : 'var(--starlight-2)',
+                  }}
+                >
+                  {p ? PHASE_LABEL[p] : 'All'}
+                </button>
+              );
+            })}
+          </div>
+          {/* Context filter */}
+          {ctxValues.length > 0 && (
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
+              {[null, ...ctxValues].map((c) => {
+                const active = ctxFilter === c;
+                const col = c ? ctxColor(c) : undefined;
+                return (
+                  <button
+                    key={c ?? 'allctx'}
+                    onClick={() => setCtxFilter(c)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 5,
+                      cursor: 'pointer',
+                      borderRadius: 'var(--radius-pill)',
+                      padding: '3px 10px',
+                      fontSize: 'var(--text-xs)',
+                      fontWeight: 'var(--weight-medium)',
+                      border: `1px solid ${active ? col ?? 'var(--night-4)' : 'var(--night-3)'}`,
+                      background: active ? `${col ?? '#3a4151'}22` : 'transparent',
+                      color: active ? 'var(--starlight)' : 'var(--starlight-2)',
+                      textTransform: 'capitalize',
+                    }}
+                  >
+                    {col && (
+                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: col }} />
+                    )}
+                    {c ?? 'All ctx'}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
       <div ref={containerRef} style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
@@ -201,6 +244,18 @@ export function GraphView({ model, selectedId, onSelect }: Props) {
                   strokeWidth={sel ? 3 : 1.2}
                   style={sel ? { filter: `drop-shadow(0 0 8px ${hex})` } : undefined}
                 />
+                {n.ctx && (
+                  <circle
+                    cx={n.x}
+                    cy={n.y}
+                    r={r + 4}
+                    fill="none"
+                    stroke={ctxColor(n.ctx)}
+                    strokeWidth={1.4}
+                    strokeDasharray="2 3"
+                    opacity={0.75}
+                  />
+                )}
                 {(r > 11 || sel) && (
                   <text
                     x={n.x}

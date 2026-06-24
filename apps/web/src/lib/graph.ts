@@ -97,6 +97,24 @@ export const PHASE_LABEL: Record<Phase, string> = {
   operational: 'Operational',
 };
 
+/**
+ * Deterministic color for a context tag. `ctx` is open-ended (stanford, phronos,
+ * syndromic, personal, …), so we hash to a stable hue rather than keep a fixed
+ * map — a new context gets a consistent color with no config.
+ */
+export function ctxColor(ctx: string): string {
+  let h = 0;
+  for (let i = 0; i < ctx.length; i++) h = (h * 31 + ctx.charCodeAt(i)) >>> 0;
+  // Golden-angle spreading so similar strings land on well-separated hues.
+  const hue = Math.round((h * 137.508) % 360);
+  return `hsl(${hue} 60% 58%)`;
+}
+
+/** Distinct non-null context tags present in the graph, sorted. */
+export function distinctCtx(nodes: GraphNode[]): string[] {
+  return [...new Set(nodes.map((n) => n.ctx).filter((c): c is string => !!c))].sort();
+}
+
 /** Phase → design-kit color vars (dot/icon color + soft tint background). */
 export const PHASE_VARS: Record<Phase, { solid: string; soft: string; deep: string }> = {
   divergent: { solid: 'var(--divergent-2)', soft: 'var(--divergent-0)', deep: 'var(--divergent-3)' },
