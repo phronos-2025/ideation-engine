@@ -1,0 +1,10 @@
+**/node_modules
+**/dist
+**/.vercel
+**/.astro
+.git
+*.log
+.env
+.env.*
+starter-material
+docs
