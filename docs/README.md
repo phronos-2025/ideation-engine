@@ -7,8 +7,12 @@ operational`. See the source specs in [`../starter-material/`](../starter-materi
 
 ## How this is documented
 
+- **[`roadmap.md`](roadmap.md)** — the forward plan for Phases 1–3, the seams to
+  formalize, and the open decisions (read this before starting a new phase).
 - **ADRs** ([`adr/`](adr/)) — one short file per significant decision, with the
-  rationale, so future changes don't accidentally reverse them.
+  rationale, so future changes don't accidentally reverse them. 0001–0005 cover
+  the Phase 0 build; **0006 (model router)**, **0007 (review queue)**, and
+  **0008 (simulation isolation)** are the forward-looking Phase 1–3 decisions.
 - **[`schema.md`](schema.md)** — the data model, tables, and the three
   corrections applied to the spec DDL.
 - **[`api.md`](api.md)** — the action-layer verbs and their HTTP routes.
