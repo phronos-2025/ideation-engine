@@ -1,0 +1,17 @@
+{
+  "name": "@phronos/llm",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.106.0"
+  }
+}
