@@ -49,6 +49,22 @@ export const addNoteInput = z.object({
 });
 export type AddNoteInput = z.infer<typeof addNoteInput>;
 
+export const enqueueBrainstormInput = z
+  .object({
+    /** A supernode whose contained members form the scope. */
+    scopeId: uuid.optional(),
+    /** Or an ad-hoc node selection. One of scopeId / nodeIds is required. */
+    nodeIds: z.array(uuid).optional(),
+    prompt: z.string().min(1),
+    /** Generator model id (e.g. claude-sonnet-4-6 / claude-opus-4-8). */
+    model: z.string().min(1),
+    params: z.record(z.unknown()).optional(),
+  })
+  .refine((v) => Boolean(v.scopeId) || (v.nodeIds?.length ?? 0) > 0, {
+    message: 'provide scopeId or a non-empty nodeIds',
+  });
+export type EnqueueBrainstormInput = z.infer<typeof enqueueBrainstormInput>;
+
 export const getGraphFilter = z
   .object({
     ctx: z.string().optional(),

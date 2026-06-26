@@ -6,14 +6,19 @@ import {
   annotation,
   chunk,
   event,
+  output,
+  run,
 } from '@phronos/db';
+import { activeEmbedModel } from '@phronos/llm';
 import type { ActorContext } from './context.js';
+import { resolveScope, type BrainstormRunJob } from './brainstorm.js';
 import type { EmbedJob } from './embed.js';
-import { CycleError, NotFoundError } from './errors.js';
+import { CycleError, NotFoundError, ValidationError } from './errors.js';
 import {
   addNoteInput,
   createNodeInput,
   createSupernodeInput,
+  enqueueBrainstormInput,
   getGraphFilter,
   linkEdgeInput,
   updateNodeInput,
@@ -120,6 +125,9 @@ export type Actions = ReturnType<typeof createActions>;
 /** Best-effort, out-of-band embed enqueue. Must never throw or block a mutation. */
 export type EnqueueEmbed = (job: EmbedJob) => void;
 
+/** Enqueue an async brainstorm run after its `run` row is committed. */
+export type EnqueueBrainstormRun = (job: BrainstormRunJob) => void;
+
 export interface CreateActionsOptions {
   /**
    * Called after a text-changing mutation commits, to (re)embed the owner's
@@ -129,6 +137,12 @@ export interface CreateActionsOptions {
    * omit it entirely.
    */
   enqueueEmbed?: EnqueueEmbed;
+  /**
+   * Called after `enqueueBrainstorm` commits its `run` row, to kick the async
+   * worker. Wired to `pgBoss.send('brainstorm.run', job)`. Wrapped so a failure
+   * leaves the run observably `queued` rather than faulting the verb.
+   */
+  enqueueBrainstormRun?: EnqueueBrainstormRun;
 }
 
 /**
@@ -143,6 +157,14 @@ export function createActions(db: Db, opts: CreateActionsOptions = {}) {
       opts.enqueueEmbed?.(job);
     } catch (err) {
       console.error('embed enqueue failed', err);
+    }
+  };
+  /** Enqueue a brainstorm run without faulting the verb (run stays queued). */
+  const enqueueBrainstormRun = (job: BrainstormRunJob): void => {
+    try {
+      opts.enqueueBrainstormRun?.(job);
+    } catch (err) {
+      console.error('brainstorm enqueue failed', err);
     }
   };
   return {
@@ -331,6 +353,54 @@ export function createActions(db: Db, opts: CreateActionsOptions = {}) {
         if (res.length === 0) throw new NotFoundError(`annotation ${id}`);
         await writeEvent(tx, ctx, { action: 'deleteAnnotation', targetType: 'annotation', targetId: id });
       });
+    },
+
+    // --- Brainstorm --------------------------------------------------------
+    /**
+     * Queue an async brainstorm run. Resolves the scope to a frozen node-id set,
+     * inserts a `run` (status='queued', snapshot, model, embed_model), writes one
+     * event, then enqueues `brainstorm.run`. Returns the run id to poll.
+     */
+    async enqueueBrainstorm(ctx: ActorContext, input: unknown): Promise<string> {
+      const v = enqueueBrainstormInput.parse(input);
+      const nodeIds = await resolveScope(db, v);
+      if (nodeIds.length === 0) throw new ValidationError('scope resolved to no nodes');
+      const embedModel = activeEmbedModel();
+      const runId = await db.transaction(async (tx) => {
+        const [row] = await tx
+          .insert(run)
+          .values({
+            scopeId: v.scopeId ?? null,
+            scopeSnapshot: { nodeIds },
+            model: v.model,
+            embedModel,
+            prompt: v.prompt,
+            params: (v.params ?? null) as object | null,
+            status: 'queued',
+            createdBy: ctx.actorId ?? null,
+            actorType: ctx.actorType,
+            simRunId: ctx.simRunId ?? null,
+          })
+          .returning({ id: run.id });
+        const id = row!.id;
+        await writeEvent(tx, ctx, {
+          action: 'enqueueBrainstorm',
+          targetType: 'run',
+          targetId: id,
+          payload: { ...v, nodeIds },
+        });
+        return id;
+      });
+      enqueueBrainstormRun({ runId });
+      return runId;
+    },
+
+    /** Read a run and its outputs (no event). */
+    async getRun(id: string) {
+      const rows = await db.select().from(run).where(eq(run.id, id)).limit(1);
+      if (rows.length === 0) throw new NotFoundError(`run ${id}`);
+      const outputs = await db.select().from(output).where(eq(output.runId, id));
+      return { ...rows[0]!, outputs };
     },
 
     // --- Reads (no events) -------------------------------------------------
