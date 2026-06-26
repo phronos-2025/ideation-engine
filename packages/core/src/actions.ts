@@ -8,6 +8,7 @@ import {
   event,
 } from '@phronos/db';
 import type { ActorContext } from './context.js';
+import type { EmbedJob } from './embed.js';
 import { CycleError, NotFoundError } from './errors.js';
 import {
   addNoteInput,
@@ -116,17 +117,39 @@ async function cascadeDeleteNodeChildren(tx: Tx, nodeId: string): Promise<void> 
 
 export type Actions = ReturnType<typeof createActions>;
 
+/** Best-effort, out-of-band embed enqueue. Must never throw or block a mutation. */
+export type EnqueueEmbed = (job: EmbedJob) => void;
+
+export interface CreateActionsOptions {
+  /**
+   * Called after a text-changing mutation commits, to (re)embed the owner's
+   * corpus chunks. Fire-and-forget: invoked outside the verb's transaction and
+   * wrapped so a failure here never faults the mutation (Phase 2 M2). The API
+   * wires this to `pgBoss.send('embed.upsert', job)`; tests can pass a spy or
+   * omit it entirely.
+   */
+  enqueueEmbed?: EnqueueEmbed;
+}
+
 /**
  * The action layer: the only write path (invariant #1). Every mutating verb
  * runs in a transaction and writes exactly one event row (invariant #2). Read
  * verbs never write events.
  */
-export function createActions(db: Db) {
+export function createActions(db: Db, opts: CreateActionsOptions = {}) {
+  /** Enqueue an embed refresh without ever faulting the originating mutation. */
+  const enqueueEmbed = (job: EmbedJob): void => {
+    try {
+      opts.enqueueEmbed?.(job);
+    } catch (err) {
+      console.error('embed enqueue failed', err);
+    }
+  };
   return {
     // --- Graph -------------------------------------------------------------
     async createNode(ctx: ActorContext, input: unknown): Promise<string> {
       const v = createNodeInput.parse(input);
-      return db.transaction(async (tx) => {
+      const id = await db.transaction(async (tx) => {
         const [row] = await tx
           .insert(node)
           .values({
@@ -138,10 +161,12 @@ export function createActions(db: Db) {
             body: v.body ?? null,
           })
           .returning({ id: node.id });
-        const id = row!.id;
-        await writeEvent(tx, ctx, { action: 'createNode', targetType: 'node', targetId: id, payload: v });
-        return id;
+        const rowId = row!.id;
+        await writeEvent(tx, ctx, { action: 'createNode', targetType: 'node', targetId: rowId, payload: v });
+        return rowId;
       });
+      if (v.body && v.body.trim()) enqueueEmbed({ ownerType: 'node', ownerId: id });
+      return id;
     },
 
     async updateNode(ctx: ActorContext, id: string, input: unknown): Promise<void> {
@@ -158,6 +183,8 @@ export function createActions(db: Db) {
         if (res.length === 0) throw new NotFoundError(`node ${id}`);
         await writeEvent(tx, ctx, { action: 'updateNode', targetType: 'node', targetId: id, payload: patch });
       });
+      // Re-embed only when the node's embeddable text (`body`) changed.
+      if (patch.body !== undefined) enqueueEmbed({ ownerType: 'node', ownerId: id });
     },
 
     async setPhase(
@@ -266,16 +293,17 @@ export function createActions(db: Db) {
     // --- Notes & annotations ----------------------------------------------
     async addNote(ctx: ActorContext, input: unknown): Promise<string> {
       const v = addNoteInput.parse(input);
-      return db.transaction(async (tx) => {
+      const id = await db.transaction(async (tx) => {
         const [row] = await tx
           .insert(annotation)
           .values({ ownerType: v.ownerType, ownerId: v.ownerId, kind: 'note', body: v.body })
           .returning({ id: annotation.id });
-        const id = row!.id;
-        // NOTE: embedding into `chunk` is wired in Phase 1 (the embedding pipeline).
-        await writeEvent(tx, ctx, { action: 'addNote', targetType: 'annotation', targetId: id, payload: v });
-        return id;
+        const rowId = row!.id;
+        await writeEvent(tx, ctx, { action: 'addNote', targetType: 'annotation', targetId: rowId, payload: v });
+        return rowId;
       });
+      enqueueEmbed({ ownerType: 'annotation', ownerId: id });
+      return id;
     },
 
     async updateAnnotation(ctx: ActorContext, id: string, body: string): Promise<void> {
@@ -293,6 +321,7 @@ export function createActions(db: Db) {
           payload: { body },
         });
       });
+      enqueueEmbed({ ownerType: 'annotation', ownerId: id });
     },
 
     async deleteAnnotation(ctx: ActorContext, id: string): Promise<void> {

@@ -1,7 +1,7 @@
-import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { sql, eq } from 'drizzle-orm';
-import { createDb, event, node, annotation } from '@phronos/db';
-import { createActions } from './actions.js';
+import { createDb, event, annotation, type Db } from '@phronos/db';
+import { createActions, type Actions } from './actions.js';
 import { systemContext } from './context.js';
 import { CycleError, NotFoundError } from './errors.js';
 
@@ -12,8 +12,15 @@ const ctx = systemContext();
 const d = url ? describe : describe.skip;
 
 d('action layer', () => {
-  const { db, close } = createDb(url!);
-  const actions = createActions(db);
+  // Lazily connect in beforeAll so a skipped run (no DATABASE_URL) never touches
+  // createDb at collection time.
+  let db: Db;
+  let close: () => Promise<void>;
+  let actions: Actions;
+  beforeAll(() => {
+    ({ db, close } = createDb(url!));
+    actions = createActions(db);
+  });
 
   beforeEach(async () => {
     await db.execute(sql`TRUNCATE node, edge, annotation, chunk, event RESTART IDENTITY CASCADE`);
